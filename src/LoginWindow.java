@@ -54,13 +54,16 @@ public class LoginWindow extends JFrame {
 	 * Create the frame.
 	 */
 	public LoginWindow() {
+		super("Welcome");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 500, 400);
 		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-		contentPane.setLayout(null);
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
+
+		contentPane.setLayout(null);
+		contentPane.setVisible(true);
 		JLabel lblUsername = new JLabel("Registration no.");
 		lblUsername.setFont(new Font("URW Gothic L", Font.PLAIN, 15));
 		lblUsername.setBounds(66, 95, 127, 30);
@@ -113,7 +116,6 @@ public class LoginWindow extends JFrame {
 		JButton btnRegister = new JButton("NOT A MEMBER?");
 		btnRegister.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
 				RegisterWindow reg_frame = new RegisterWindow();
 				reg_frame.setVisible(true);
 			}
@@ -124,8 +126,6 @@ public class LoginWindow extends JFrame {
 		
 		tfPassword = new JPasswordField();
 		tfPassword.setBounds(208, 136, 152, 27);
-		contentPane.add(tfPassword);
-
-		
+		contentPane.add(tfPassword);		
 	}
 }
