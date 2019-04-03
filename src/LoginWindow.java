@@ -3,6 +3,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -103,7 +104,7 @@ public class LoginWindow extends JFrame {
 					else {
 						JOptionPane.showMessageDialog(null, "Username or password incorrect!", "Oops!", JOptionPane.ERROR_MESSAGE);
 					}
-				}catch(Exception exc) {
+				}catch(SQLException exc) {
 					JOptionPane.showMessageDialog(null, "Oops!", "Error in connection", JOptionPane.WARNING_MESSAGE);;
 				}
 			}
