@@ -271,19 +271,22 @@ public class RegisterWindow extends JFrame {
 					pst.setString(4, secid);
 					pst.setString(5, comboBoxYear.getItemAt(comboBoxYear.getSelectedIndex()).toString());
 					pst.setString(6, tfAddress.getText());
-	
-					rs = (OracleResultSet)pst.executeQuery();
 					
-					//to insert into LOGIN, reusing pst, rs
-					pst = (OraclePreparedStatement) conn.prepareStatement("insert into login values (?, ?)");
-					pst.setString(1, regno );
 					String p = tfPassword.getText();
 					String cp = tfCPassword.getText();
 					boolean pflag = true;
 					if(!(p.equals(cp)&&p.length()>3)) {
 						flag = false;
 						JOptionPane.showMessageDialog(null, "Improper password.\nPassword must be greater than 3 characters.\nPasswords must match", "Password error", JOptionPane.WARNING_MESSAGE);
-					}	
+						throw new SQLException("Password error");
+					}
+	
+					rs = (OracleResultSet)pst.executeQuery();
+					
+					//to insert into LOGIN, reusing pst, rs
+					pst = (OraclePreparedStatement) conn.prepareStatement("insert into login values (?, ?)");
+					pst.setString(1, regno );
+						
 					pst.setString(2,p);
 					
 					if(flag&&pflag)//Login table is populated only if flag is true (flag=false whenever there is a constraint error)
