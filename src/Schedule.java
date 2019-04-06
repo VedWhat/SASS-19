@@ -1,0 +1,234 @@
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
+import javax.swing.UIManager;
+import java.awt.CardLayout;
+
+import javax.swing.ComboBoxModel;
+import javax.swing.JButton;
+import java.awt.Font;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+import javax.swing.border.SoftBevelBorder;
+
+import oracle.jdbc.internal.OraclePreparedStatement;
+import oracle.jdbc.internal.OracleResultSet;
+
+import javax.swing.border.BevelBorder;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JComboBox;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JCheckBox;
+import javax.swing.JSeparator;
+
+@SuppressWarnings("unused")
+public class Schedule extends JFrame {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	
+	Connection conn=null;
+    OraclePreparedStatement pst=null;
+    OracleResultSet rs=null;
+    private JTextField textField;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		EventQueue.invokeLater(new Runnable() {//this serves merely to run this as a standalone, can be deleted.
+			public void run() {
+				try {
+					//do something?
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	@SuppressWarnings("unchecked")
+	public Schedule(String regno) {
+		setTitle("Let's play - SASS");
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setBounds(100, 100, 510, 477);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(new CardLayout(0, 0));
+		String currUser = null;
+		JLabel lblInfo;
+		conn = JavaConnectDB.ConnectDB();
+		JPanel mainPanel = new JPanel();
+		//Logged in as ?
+		lblInfo = new JLabel("Logged in as : ");
+		lblInfo.setFont(new Font("Courier 10 Pitch", Font.BOLD, 19));
+		lblInfo.setBounds(24, 12, 453, 33);
+		try {
+			pst = (OraclePreparedStatement) conn.prepareStatement("select name, reg_no, sec_id, cyear from student where reg_no =?");
+			pst.setString(1, regno);
+			rs = (OracleResultSet)pst.executeQuery();
+			rs.next();
+			currUser = rs.getString(1);
+			
+			JLabel lblUserInfo = new JLabel("<html>"+currUser+"<br/>"+rs.getString(2)+"<br/>"+rs.getString(3)+"<br/>Year: 0"+rs.getString(4)+"</html>");
+			lblUserInfo.setFont(new Font("URW Gothic L", Font.ITALIC, 17));
+			lblUserInfo.setBounds(24, 43, 464, 108);
+			mainPanel.add(lblUserInfo);
+			
+			
+		}
+		
+		catch(SQLException e) {
+			JOptionPane.showMessageDialog(this, e.getMessage(), "SQLException", JOptionPane.ERROR_MESSAGE );
+		}
+		
+		contentPane.add(mainPanel, "Schedule");
+		
+		JPanel resultPanel = new JPanel();
+		contentPane.add(resultPanel, "GameSet");
+		
+		mainPanel.setLayout(null);
+		resultPanel.setLayout(null);
+		JPanel buttonPanel = new JPanel();
+		
+		buttonPanel.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		buttonPanel.setBounds(0, 385, 500, 54);
+		mainPanel.add(buttonPanel);
+		buttonPanel.setLayout(null);
+		
+		CardLayout cl = (CardLayout)contentPane.getLayout();
+		JButton btnNext = new JButton("Next");
+		
+		btnNext.setFont(new Font("Courier 10 Pitch", Font.BOLD, 18));
+		btnNext.setBounds(393, 12, 95, 33);
+		buttonPanel.add(btnNext);
+		
+		mainPanel.add(lblInfo);
+		
+		
+		JButton btnPrevious = new JButton("Cancel");
+		btnPrevious.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
+		btnPrevious.setFont(new Font("Courier 10 Pitch", Font.BOLD, 18));
+		btnPrevious.setBounds(271, 12, 110, 33);
+		buttonPanel.add(btnPrevious);
+		
+		JButton btnAddSport = new JButton("Add Sport");
+		btnAddSport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				AddSport newSport = new AddSport(regno);
+				newSport.setVisible(true);
+				newSport.setAlwaysOnTop(true);
+			}
+		});
+		btnAddSport.setBounds(371, 161, 106, 33);
+		mainPanel.add(btnAddSport);
+		
+		JLabel lblSelectSport = new JLabel("Select sport:");
+		lblSelectSport.setFont(new Font("URW Gothic L", Font.PLAIN, 17));
+		lblSelectSport.setBounds(24, 286, 207, 30);
+		mainPanel.add(lblSelectSport);
+		
+		String sport[] = {"Tennis", "Football", "Cricket", "Futsal", "Table Tennis"};
+		ArrayList<String> arena = new ArrayList<String>(4);
+		
+		
+		@SuppressWarnings("rawtypes")
+		JComboBox comboBoxSport = new JComboBox(sport);
+		comboBoxSport.setToolTipText("Sport once selected will be final for current instance!");
+		
+		
+		
+		comboBoxSport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				String sid = ((Integer)(comboBoxSport.getSelectedIndex()+1)).toString();
+				boolean flag = false;
+				try {
+					pst = (OraclePreparedStatement)conn.prepareStatement("select aid, location from arena natural join offered_by where sid = ?");
+					pst.setString(1, sid);
+					rs = (OracleResultSet)pst.executeQuery();
+					while(rs.next()) {
+						arena.add(rs.getString(2));
+					}
+					
+				}catch(SQLException ex) {
+					JOptionPane.showMessageDialog(null, ex.getMessage());
+				}
+				String[] arrayArena = arena.toArray(new String[arena.size()]);
+				JComboBox comboBoxArena = new JComboBox(arrayArena);
+				String aid =((Integer)(comboBoxArena.getSelectedIndex()+1)).toString();
+				comboBoxArena.setBounds(270, 328, 207, 29);
+				mainPanel.add(comboBoxArena);
+				comboBoxSport.setEnabled(false);
+				
+				//btnNext must work only after the arena has been selected:
+				btnNext.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						cl.next(contentPane);
+					}
+				});
+				
+				
+			}
+		});
+		
+		comboBoxSport.setBounds(270, 286, 207, 29);
+		mainPanel.add(comboBoxSport);
+		
+		JLabel lblSelectArena = new JLabel("Select arena:");
+		lblSelectArena.setFont(new Font("URW Gothic L", Font.PLAIN, 17));
+		lblSelectArena.setBounds(24, 328, 207, 30);
+		mainPanel.add(lblSelectArena);
+		
+		JLabel lblLearntToPlay = new JLabel("Learnt to play something new?");
+		lblLearntToPlay.setFont(new Font("URW Gothic L", Font.PLAIN, 17));
+		lblLearntToPlay.setBounds(24, 163, 300, 30);
+		mainPanel.add(lblLearntToPlay);
+		
+		JSeparator separator_1 = new JSeparator();
+		separator_1.setBounds(24, 218, 453, 3);
+		mainPanel.add(separator_1);
+		
+		JLabel lblReady = new JLabel("Ready?");
+		lblReady.setFont(new Font("Courier 10 Pitch", Font.BOLD, 19));
+		lblReady.setBounds(24, 233, 453, 41);
+		mainPanel.add(lblReady);
+		
+		
+		//String sid has sportid
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	}
+}

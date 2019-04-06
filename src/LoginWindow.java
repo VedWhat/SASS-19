@@ -97,9 +97,9 @@ public class LoginWindow extends JFrame {
 					pst.setString(2, tfPassword.getText());
 					rs = (OracleResultSet)pst.executeQuery();
 					if (rs.next()) {
-						JOptionPane.showMessageDialog(null, "Login successful!");
-						//SelectArena sa = new SelectArena();
-						//sa.setVisible(true);
+						//JOptionPane.showMessageDialog(null, "Login successful!");
+						Schedule s = new Schedule(rs.getString(1));
+						s.setVisible(true);
 					}
 					else {
 						JOptionPane.showMessageDialog(null, "Username or password incorrect!", "Oops!", JOptionPane.ERROR_MESSAGE);
