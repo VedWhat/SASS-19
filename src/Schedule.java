@@ -12,7 +12,9 @@ import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import java.awt.Font;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 import javax.swing.border.SoftBevelBorder;
@@ -28,6 +30,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JCheckBox;
 import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 
 @SuppressWarnings("unused")
 public class Schedule extends JFrame {
@@ -82,25 +85,42 @@ public class Schedule extends JFrame {
 		//Logged in as ?
 		lblInfo = new JLabel("Logged in as : ");
 		lblInfo.setFont(new Font("Courier 10 Pitch", Font.BOLD, 19));
-		lblInfo.setBounds(24, 12, 453, 33);
+		lblInfo.setBounds(24, 0, 453, 42);
 		try {
 			pst = (OraclePreparedStatement) conn.prepareStatement("select name, reg_no, sec_id, cyear from student where reg_no =?");
 			pst.setString(1, regno);
 			rs = (OracleResultSet)pst.executeQuery();
 			rs.next();
 			currUser = rs.getString(1);
+			OraclePreparedStatement gsp = (OraclePreparedStatement) conn.prepareStatement("select distinct name from sport natural join plays where reg_no=?" );
+			gsp.setString(1, regno);
+			OracleResultSet gsr = (OracleResultSet)gsp.executeQuery();
+			String spInfo = "<html><b>Your sports:</b><br/>";
+			while(gsr.next()) {
+				spInfo = spInfo + gsr.getString(1) + "<br/";
+			}
 			
 			JLabel lblUserInfo = new JLabel("<html>"+currUser+"<br/>"+rs.getString(2)+"<br/>"+rs.getString(3)+"<br/>Year: 0"+rs.getString(4)+"</html>");
+			
+			JLabel lblSportInfo = new JLabel(spInfo);
+			
 			lblUserInfo.setFont(new Font("URW Gothic L", Font.ITALIC, 17));
-			lblUserInfo.setBounds(24, 43, 464, 108);
+			lblUserInfo.setBounds(24, 37, 233, 115);
 			mainPanel.add(lblUserInfo);
 			
+			lblSportInfo.setFont(new Font("URW Gothic L", Font.ITALIC, 17));
+			lblSportInfo.setBounds(255, 37, 233, 115);
+			mainPanel.add(lblSportInfo);
 			
 		}
 		
 		catch(SQLException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage(), "SQLException", JOptionPane.ERROR_MESSAGE );
+			e.printStackTrace();
 		}
+		
+		
+		
 		
 		contentPane.add(mainPanel, "Schedule");
 		
@@ -109,6 +129,12 @@ public class Schedule extends JFrame {
 		
 		mainPanel.setLayout(null);
 		resultPanel.setLayout(null);
+		
+		JLabel lblItsAMatch = new JLabel("It's a Match!");
+		lblItsAMatch.setHorizontalAlignment(SwingConstants.CENTER);
+		lblItsAMatch.setFont(new Font("Courier 10 Pitch", Font.BOLD, 23));
+		lblItsAMatch.setBounds(12, 12, 476, 43);
+		resultPanel.add(lblItsAMatch);
 		JPanel buttonPanel = new JPanel();
 		
 		buttonPanel.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
@@ -144,7 +170,7 @@ public class Schedule extends JFrame {
 				newSport.setAlwaysOnTop(true);
 			}
 		});
-		btnAddSport.setBounds(371, 161, 106, 33);
+		btnAddSport.setBounds(371, 174, 106, 33);
 		mainPanel.add(btnAddSport);
 		
 		JLabel lblSelectSport = new JLabel("Select sport:");
@@ -178,7 +204,9 @@ public class Schedule extends JFrame {
 				}catch(SQLException ex) {
 					JOptionPane.showMessageDialog(null, ex.getMessage());
 				}
+				
 				String[] arrayArena = arena.toArray(new String[arena.size()]);
+				
 				JComboBox comboBoxArena = new JComboBox(arrayArena);
 				String aid =((Integer)(comboBoxArena.getSelectedIndex()+1)).toString();
 				comboBoxArena.setBounds(270, 328, 207, 29);
@@ -206,7 +234,7 @@ public class Schedule extends JFrame {
 		
 		JLabel lblLearntToPlay = new JLabel("Learnt to play something new?");
 		lblLearntToPlay.setFont(new Font("URW Gothic L", Font.PLAIN, 17));
-		lblLearntToPlay.setBounds(24, 163, 300, 30);
+		lblLearntToPlay.setBounds(25, 176, 300, 30);
 		mainPanel.add(lblLearntToPlay);
 		
 		JSeparator separator_1 = new JSeparator();
@@ -217,6 +245,8 @@ public class Schedule extends JFrame {
 		lblReady.setFont(new Font("Courier 10 Pitch", Font.BOLD, 19));
 		lblReady.setBounds(24, 233, 453, 41);
 		mainPanel.add(lblReady);
+		
+		
 		
 		
 		//String sid has sportid

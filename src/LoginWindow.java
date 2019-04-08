@@ -63,7 +63,7 @@ public class LoginWindow extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
 
-		contentPane.setLayout(null);
+		contentPane.setLayout(null); 
 		contentPane.setVisible(true);
 		JLabel lblUsername = new JLabel("Registration no.");
 		lblUsername.setFont(new Font("URW Gothic L", Font.PLAIN, 15));

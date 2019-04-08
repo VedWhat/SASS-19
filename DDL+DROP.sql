@@ -1,3 +1,4 @@
+drop table login;
 drop table assigned;
 drop table match;
 drop table offered_by;
@@ -11,15 +12,16 @@ drop table timeslot;
 
 create table TimeSlot(
 	t_id number(5),
-	Mon varchar(20),
-	Tue varchar(20),
-	Wed varchar(20),
-	Thu varchar(20),
-	Fri varchar(20),
-	Sat varchar(20),
-	Sun varchar(20),
+	Mon varchar(1),
+	Tue varchar(1),
+	Wed varchar(1),
+	Thu varchar(1),
+	Fri varchar(1),
+	Sat varchar(1),
+	Sun varchar(1),
 	primary key(t_id)
 );
+
 create table Section(
 	sec_id varchar (5)not null ,
 	CYear number(1)not null,
@@ -29,7 +31,7 @@ create table Section(
 );
 
 create table Student  (
-	reg_no number(10) ,
+	reg_no number(10),
 	name varchar(19) not null,
 	Sec_id varchar(5) not null,
 	CYear number(1) not null,
@@ -93,7 +95,7 @@ create table match(
   );
 
 create table assigned(
-   	reg_no number(5),
+   	reg_no number(10),
    	MID number(5),
    	primary key(reg_no,MID),
 	foreign key (MID) references Match,

@@ -46,6 +46,8 @@ public class RegisterWindow extends JFrame {
 	Connection conn=null;
     OraclePreparedStatement pst=null;
     OracleResultSet rs=null;
+    private JTextField tfPrimary;
+    private JTextField tfSecondary;
 
 	/**
 	 * Launch the application.
@@ -158,70 +160,70 @@ public class RegisterWindow extends JFrame {
 		
 		JTextArea tfAddress = new JTextArea();
 		tfAddress.setToolTipText("Your address must not exceed 19 characters");
-		tfAddress.setBounds(189, 248, 161, 45);
+		tfAddress.setBounds(189, 248, 161, 26);
 		contentPane.add(tfAddress);
 		
 		JSeparator separator = new JSeparator();
-		separator.setBounds(20, 305, 330, 10);
+		separator.setBounds(20, 339, 330, 10);
 		contentPane.add(separator);
 		
 		JLabel lblSportDetails = new JLabel("Sport");
 		lblSportDetails.setFont(new Font("Courier 10 Pitch", Font.BOLD, 18));
-		lblSportDetails.setBounds(27, 305, 133, 26);
+		lblSportDetails.setBounds(27, 339, 133, 26);
 		contentPane.add(lblSportDetails);
 		
 		
 		JCheckBox chckbxTennis = new JCheckBox("Tennis");
-		chckbxTennis.setBounds(27, 327, 133, 26);
+		chckbxTennis.setBounds(27, 361, 133, 26);
 		contentPane.add(chckbxTennis);
 		
 		JCheckBox chckbxFootball = new JCheckBox("Football");
-		chckbxFootball.setBounds(27, 348, 133, 17);
+		chckbxFootball.setBounds(27, 382, 133, 17);
 		contentPane.add(chckbxFootball);
 		
 		JCheckBox chckbxCricket = new JCheckBox("Cricket");
-		chckbxCricket.setBounds(27, 365, 133, 17);
+		chckbxCricket.setBounds(27, 399, 133, 17);
 		contentPane.add(chckbxCricket);
 		
 		JCheckBox chckbxFutsal = new JCheckBox("Futsal");
-		chckbxFutsal.setBounds(27, 377, 133, 24);
+		chckbxFutsal.setBounds(27, 411, 133, 24);
 		contentPane.add(chckbxFutsal);
 		
 		JCheckBox chckbxTableTennis = new JCheckBox("Table Tennis");
 		chckbxTableTennis.setToolTipText("");
-		chckbxTableTennis.setBounds(27, 394, 133, 24);
+		chckbxTableTennis.setBounds(27, 428, 133, 24);
 		contentPane.add(chckbxTableTennis);		
 		
 		Integer skillLevel[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 		
 		JComboBox comboBoxTennis = new JComboBox(skillLevel);
 		comboBoxTennis.setToolTipText("How well do you play?");
-		comboBoxTennis.setBounds(217, 334, 70, 17);
+		comboBoxTennis.setBounds(217, 368, 70, 17);
 		contentPane.add(comboBoxTennis);
 		
 		JComboBox comboBoxFootball = new JComboBox(skillLevel);
 		comboBoxFootball.setToolTipText("How well do you play?");
-		comboBoxFootball.setBounds(217, 348, 70, 17);
+		comboBoxFootball.setBounds(217, 382, 70, 17);
 		contentPane.add(comboBoxFootball);
 		
 		JComboBox comboBoxCricket = new JComboBox(skillLevel);
 		comboBoxCricket.setToolTipText("How well do you play?");
-		comboBoxCricket.setBounds(217, 365, 70, 17);
+		comboBoxCricket.setBounds(217, 399, 70, 17);
 		contentPane.add(comboBoxCricket);
 		
 		JComboBox comboBoxFutsal = new JComboBox(skillLevel);
 		comboBoxFutsal.setToolTipText("How well do you play?");
-		comboBoxFutsal.setBounds(217, 381, 70, 17);
+		comboBoxFutsal.setBounds(217, 415, 70, 17);
 		contentPane.add(comboBoxFutsal);
 		
 		JComboBox comboBoxTableTennis = new JComboBox(skillLevel);
 		comboBoxTableTennis.setToolTipText("How well do you play?");
-		comboBoxTableTennis.setBounds(217, 398, 70, 17);
+		comboBoxTableTennis.setBounds(217, 432, 70, 17);
 		contentPane.add(comboBoxTableTennis);
 		
 		JLabel lblSkill = new JLabel("Skill");
 		lblSkill.setFont(new Font("Courier 10 Pitch", Font.BOLD, 18));
-		lblSkill.setBounds(217, 305, 133, 26);
+		lblSkill.setBounds(217, 339, 133, 26);
 		contentPane.add(lblSkill);
 		
 		JButton btnRegister = new JButton("REGISTER");
@@ -321,9 +323,20 @@ public class RegisterWindow extends JFrame {
 						pst.setString(3, comboBoxTableTennis.getItemAt(comboBoxTableTennis.getSelectedIndex()).toString());
 						pst.executeQuery();
 					}
+					try {
+						pst = (OraclePreparedStatement) conn.prepareStatement("insert into phone values (?,?,?)");
+						pst.setString(1, regno);
+						if(tfPrimary.getText().length()!=10 || tfSecondary.getText().length()!=10)
+							throw new Exception();
+						pst.setString(2, tfPrimary.getText());
+						pst.setString(3, tfSecondary.getText());
+						rs = (OracleResultSet)pst.executeQuery();
+					}catch(Exception e1) {
+						JOptionPane.showMessageDialog(null, "Phone number must have 10 digits", "Invalid number", JOptionPane.ERROR_MESSAGE);
+					}
 					
 					JOptionPane.showMessageDialog(null, "Registered successfully!", "Success", JOptionPane.PLAIN_MESSAGE);
-					
+					dispose();
 					
 					}catch(SQLException ex) {
 						if(flag)
@@ -334,10 +347,27 @@ public class RegisterWindow extends JFrame {
 			}
 		});
 		btnRegister.setFont(new Font("Courier 10 Pitch", Font.BOLD, 18));
-		btnRegister.setBounds(137, 448, 150, 31);
+		btnRegister.setBounds(137, 464, 150, 31);
 		contentPane.add(btnRegister);
+		
+		JLabel lblPrimaryphone = new JLabel("Primary contact");
+		lblPrimaryphone.setBounds(27, 283, 150, 17);
+		contentPane.add(lblPrimaryphone);
+		
+		JLabel lblSecondaryContact = new JLabel("Secondary contact");
+		lblSecondaryContact.setBounds(27, 310, 150, 17);
+		contentPane.add(lblSecondaryContact);
+		
+		tfPrimary = new JTextField();
+		tfPrimary.setColumns(10);
+		tfPrimary.setBounds(189, 278, 161, 27);
+		contentPane.add(tfPrimary);
+		
+		tfSecondary = new JTextField();
+		tfSecondary.setColumns(10);
+		tfSecondary.setBounds(189, 305, 161, 27);
+		contentPane.add(tfSecondary);
 		
 		
 	}
-
 }
