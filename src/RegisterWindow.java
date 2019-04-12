@@ -185,9 +185,9 @@ public class RegisterWindow extends JFrame {
 		chckbxCricket.setBounds(27, 399, 133, 17);
 		contentPane.add(chckbxCricket);
 		
-		JCheckBox chckbxFutsal = new JCheckBox("Futsal");
-		chckbxFutsal.setBounds(27, 411, 133, 24);
-		contentPane.add(chckbxFutsal);
+		JCheckBox chckbxBasketball = new JCheckBox("Basketball");
+		chckbxBasketball.setBounds(27, 411, 133, 24);
+		contentPane.add(chckbxBasketball);
 		
 		JCheckBox chckbxTableTennis = new JCheckBox("Table Tennis");
 		chckbxTableTennis.setToolTipText("");
@@ -313,7 +313,7 @@ public class RegisterWindow extends JFrame {
 						pst.setString(3, comboBoxCricket.getItemAt(comboBoxCricket.getSelectedIndex()).toString());
 						pst.executeQuery();
 					}
-					if(chckbxFutsal.isSelected()) {
+					if(chckbxBasketball.isSelected()) {
 						pst.setString(2, "4");
 						pst.setString(3, comboBoxFutsal.getItemAt(comboBoxFutsal.getSelectedIndex()).toString());
 						pst.executeQuery();

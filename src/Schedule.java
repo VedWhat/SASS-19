@@ -11,6 +11,7 @@ import java.awt.CardLayout;
 import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import java.awt.Font;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,6 +22,7 @@ import javax.swing.border.SoftBevelBorder;
 
 import oracle.jdbc.internal.OraclePreparedStatement;
 import oracle.jdbc.internal.OracleResultSet;
+import oracle.sql.NUMBER;
 
 import javax.swing.border.BevelBorder;
 import javax.swing.JLabel;
@@ -31,6 +33,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.JCheckBox;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+import javax.swing.JScrollPane;
+import javax.swing.JList;
 
 @SuppressWarnings("unused")
 public class Schedule extends JFrame {
@@ -41,6 +45,7 @@ public class Schedule extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	
+	static String aid;
 	Connection conn=null;
     OraclePreparedStatement pst=null;
     OracleResultSet rs=null;
@@ -133,8 +138,36 @@ public class Schedule extends JFrame {
 		JLabel lblItsAMatch = new JLabel("It's a Match!");
 		lblItsAMatch.setHorizontalAlignment(SwingConstants.CENTER);
 		lblItsAMatch.setFont(new Font("Courier 10 Pitch", Font.BOLD, 23));
-		lblItsAMatch.setBounds(12, 12, 476, 43);
+		lblItsAMatch.setBounds(12, 0, 476, 43);
 		resultPanel.add(lblItsAMatch);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(0, 53, 488, 319);
+		resultPanel.add(scrollPane);
+		
+		
+		
+		
+		JPanel btnpanel = new JPanel();
+		btnpanel.setLayout(null);
+		btnpanel.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		btnpanel.setBounds(0, 385, 500, 54);
+		resultPanel.add(btnpanel);
+		
+		JButton btnNextF = new JButton("Next");
+		btnNextF.setFont(new Font("Courier 10 Pitch", Font.BOLD, 18));
+		btnNextF.setBounds(393, 12, 95, 33);
+		btnpanel.add(btnNextF);
+		
+		JButton btnCancel = new JButton("Cancel");
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
+		btnCancel.setFont(new Font("Courier 10 Pitch", Font.BOLD, 18));
+		btnCancel.setBounds(271, 12, 110, 33);
+		btnpanel.add(btnCancel);
 		JPanel buttonPanel = new JPanel();
 		
 		buttonPanel.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
@@ -208,7 +241,7 @@ public class Schedule extends JFrame {
 				String[] arrayArena = arena.toArray(new String[arena.size()]);
 				
 				JComboBox comboBoxArena = new JComboBox(arrayArena);
-				String aid =((Integer)(comboBoxArena.getSelectedIndex()+1)).toString();
+				aid =((Integer)(comboBoxArena.getSelectedIndex()+1)).toString();
 				comboBoxArena.setBounds(270, 328, 207, 29);
 				mainPanel.add(comboBoxArena);
 				comboBoxSport.setEnabled(false);
@@ -246,10 +279,37 @@ public class Schedule extends JFrame {
 		lblReady.setBounds(24, 233, 453, 41);
 		mainPanel.add(lblReady);
 		
+		try {
+			//regno has regno, sid will have sid, aid is static
+			String sid = ((Integer)(comboBoxSport.getSelectedIndex()+1)).toString();
+			//get DAY and TIME
+			CallableStatement cstmt = conn.prepareCall("{call getDay(?, ?)}");
+			cstmt.setString(1, "sysdate");
+			cstmt.registerOutParameter(2, java.sql.Types.VARCHAR);
+			cstmt.executeUpdate();
+			String day = cstmt.getString(2);
+			
+			
+			pst = (OraclePreparedStatement)conn.prepareStatement("(select reg_no, name, sec_id, cyear" + 
+					"from student natural join section natural join timeslot natural join plays " + 
+					"where ?=? and sid = ?) minus (select reg_no, name, sec_id, cyear from student natural join section natural join timeslot where reg_no = ?)");
+			pst.setString(1, day);
+			pst.setString(2, "(select calMatchHalf from dual");
+			pst.setString(3, sid);
+			pst.setString(4, regno);
+			rs = (OracleResultSet)pst.executeQuery();
+			
+			while(rs.next()) {
+				
+			}
+			
+		}catch(SQLException ex) {
+			JOptionPane.showMessageDialog(null, ex.getMessage());
+		}
 		
-		
-		
-		//String sid has sportid
+		JList list = new JList();
+		scrollPane.setViewportView(list);
+		//String sid has sportid and 
 		
 		
 		

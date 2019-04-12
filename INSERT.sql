@@ -37,16 +37,16 @@ insert into student values(8,'Rob','IT-A',4,7,'Birmingham','M','N');
 insert into student values(9,'Serena','CSE-A',1,6,'Denver','F','N');
 insert into student values(10,'Roger','CSE-C',3,10,'Basel','M','N');
 
-insert into Phone values(1,0987654321,0934534555,null);
-insert into Phone values(2,0987654221,0944333567,null);
-insert into Phone values(3,0987121211,0557777777,null);
-insert into Phone values(4,0987613451,0137666644,null);
-insert into Phone values(5,0987543461,1187653555,null);
-insert into Phone values(6,0987343600,0387334535,null);
-insert into Phone values(7,0944444444,0117334535,null);
-insert into Phone values(8,0987343242,0287334535,null);
-insert into Phone values(9,0987343244,0227334535,null);
-insert into Phone values(10,0987342212,0447334535,null);
+insert into Phone values(1,0987654321,0934534555);
+insert into Phone values(2,0987654221,0944333567);
+insert into Phone values(3,0987121211,0557777777);
+insert into Phone values(4,0987613451,0137666644);
+insert into Phone values(5,0987543461,1187653555);
+insert into Phone values(6,0987343600,0387334535);
+insert into Phone values(7,0944444444,0117334535);
+insert into Phone values(8,0987343242,0287334535);
+insert into Phone values(9,0987343244,0227334535);
+insert into Phone values(10,0987342212,0447334535);
 
 
 

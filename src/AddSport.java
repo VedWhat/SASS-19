@@ -68,7 +68,7 @@ public class AddSport extends JFrame {
 		lblSport.setBounds(12, 57, 70, 17);
 		contentPane.add(lblSport);
 		
-		String sport[] = {"Tennis", "Football", "Cricket", "Futsal", "Table Tennis"};
+		String sport[] = {"Tennis", "Football", "Cricket", "Basketball", "Table Tennis"};
 		JComboBox<String> cbSport = new JComboBox(sport);
 		cbSport.setToolTipText("Select the sport you want to add");
 		cbSport.setBounds(136, 52, 215, 27);
