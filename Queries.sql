@@ -63,3 +63,8 @@ select name, ct from list1 where ct=(select max(ct) from list1);
     (select reg_no, name, cyear, skill
     from student natural join section natural join timeslot natural join plays
     where MON='F' and sid = 2) minus (select reg_no, name, cyear, skill from student natural join section natural join timeslot natural join plays where reg_no = 1)
+    
+    
+    
+  12. --Adding to match 
+   insert into match values((select to_number(to_char(sysdate,'YYHHMMSS')) from dual),sid,aid,sysdate,result);
