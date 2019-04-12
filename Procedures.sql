@@ -16,20 +16,20 @@ SELECT calMatchHalf from dual;
 ------------------------------------------------------------------
 
 
-create or replace procedure getDay(date1 in date,day out varchar) as
+create or replace procedure getDay(day out varchar) as
 	begin 
-		select to_char(date1,'DY') into day from dual;
+		select to_char(sysdate,'DY') into day from dual;
 	end;
 	/
 -------------------------------------------------------------------
 declare 
 day varchar(3);
 begin 
-getDay(sysdate,day);
+getDay(day);
 dbms_output.put_line(day);
 end;
 /
---------------------------------------------------------------------
+--------------------------------------------------------------------S
 			     
 			     
 create or replace procedure getMatchID(mid out match.mid%type) as
