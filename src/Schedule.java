@@ -38,6 +38,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 
 @SuppressWarnings("unused")
 public class Schedule extends JFrame {
@@ -57,7 +58,7 @@ public class Schedule extends JFrame {
     OracleResultSet rs=null;
     private JTextField textField;
     private JTable table;
-
+    static String mid;
 	/**
 	 * Launch the application.
 	 */
@@ -143,9 +144,53 @@ public class Schedule extends JFrame {
 		contentPane.add(finalPanel, "Match");
 		finalPanel.setLayout(null);
 		
-		table = new JTable();
-		table.setBounds(12, 77, 476, 350);
-		finalPanel.add(table);
+		JTextArea txtrResult = new JTextArea();
+		txtrResult.setText("Enter your match results here!");
+		txtrResult.setFont(new Font("URW Gothic L", Font.PLAIN, 15));
+		txtrResult.setToolTipText("Enter the result of the match here!");
+		txtrResult.setBounds(12, 376, 348, 51);
+		finalPanel.add(txtrResult);
+		
+		JButton btnNewButton = new JButton("Exit");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					OracleStatement os = (OracleStatement)conn.createStatement();
+					os.executeQuery("update match set result='"+txtrResult.getText()+"' where mid="+mid);
+				}catch(SQLException eq1) {
+					JOptionPane.showMessageDialog(null, eq1.getMessage());}
+				dispose();
+			}
+		});
+		btnNewButton.setFont(new Font("Courier 10 Pitch", Font.BOLD, 23));
+		btnNewButton.setBounds(372, 376, 116, 51);
+		finalPanel.add(btnNewButton);
+		
+		JLabel pnlName = new JLabel("");
+		pnlName.setVerticalAlignment(SwingConstants.TOP);
+		pnlName.setBounds(12, 62, 143, 302);
+		finalPanel.add(pnlName);
+		
+		JLabel pnlPhone = new JLabel("New label");
+		pnlPhone.setVerticalAlignment(SwingConstants.TOP);
+		pnlPhone.setBounds(167, 62, 143, 302);
+		finalPanel.add(pnlPhone);
+		
+		JLabel pnlAddress = new JLabel("New label");
+		pnlAddress.setVerticalAlignment(SwingConstants.TOP);
+		pnlAddress.setBounds(322, 62, 166, 302);
+		finalPanel.add(pnlAddress);
+		
+		JLabel lblHead = new JLabel();
+		lblHead.setFont(new Font("Courier 10 Pitch", Font.BOLD, 21));
+		lblHead.setBounds(12, 0, 476, 51);
+		finalPanel.add(lblHead);
+		
+		
+		
+		
+		
+		
 		
 		mainPanel.setLayout(null);
 		resultPanel.setLayout(null);
@@ -179,6 +224,8 @@ public class Schedule extends JFrame {
 		JButton btnCancel = new JButton("Cancel");
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				v.clear();
+				reg.clear();
 				dispose();
 			}
 		});
@@ -194,6 +241,7 @@ public class Schedule extends JFrame {
 		
 		CardLayout cl = (CardLayout)contentPane.getLayout();
 		JButton btnNext = new JButton("Next");
+		
 		
 		btnNext.setFont(new Font("Courier 10 Pitch", Font.BOLD, 18));
 		btnNext.setBounds(393, 12, 95, 33);
@@ -228,7 +276,7 @@ public class Schedule extends JFrame {
 		lblSelectSport.setBounds(24, 286, 207, 30);
 		mainPanel.add(lblSelectSport);
 		
-		String sport[] = {"Tennis", "Football", "Cricket", "Futsal", "Table Tennis"};
+		String sport[] = {"Tennis", "Football", "Cricket", "Basketball", "Table Tennis"};
 		ArrayList<String> arena = new ArrayList<String>(4);
 		
 		
@@ -267,12 +315,25 @@ public class Schedule extends JFrame {
 				//btnNext must work only after the arena has been selected:
 				btnNext.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
+						
+						
+						
 						JList<String> list;
 						try {
 							//regno has regno, sid will have sid, aid is static
 							String sid = ((Integer)(comboBoxSport.getSelectedIndex()+1)).toString();
 							//get DAY and TIME
 							conn = JavaConnectDB.ConnectDB();
+							
+							String req ="<html><b>For your current selection:<b><br/>";
+							OracleStatement o = (OracleStatement)conn.createStatement();
+							OracleResultSet x = (OracleResultSet)o.executeQuery("select a_req from arena where aid = "+aid);
+							x.next();
+							req = req+"<i>Arena requirements:</i>"+x.getString(1)+"<br/>";
+							x = (OracleResultSet)o.executeQuery("select s_req from sport where sid = "+sid);
+							x.next();
+							req = req+ "<i>Sport requirements:</i>"+x.getString(1)+"<br/>";
+							JOptionPane.showMessageDialog(null, req, "REQUIREMENTS", JOptionPane.WARNING_MESSAGE);
 							
 							CallableStatement cstmt = conn.prepareCall("{call getDay(?)}");
 							cstmt.registerOutParameter(1, java.sql.Types.VARCHAR);
@@ -283,25 +344,15 @@ public class Schedule extends JFrame {
 							OracleResultSet f = (OracleResultSet)os.executeQuery("select calMatchHalf from dual");
 							f.next();
 							String half = "'"+f.getString(1)+"'";
-							System.out.println(day);
-							System.out.println(half);
-							//OraclePreparedStatement pst1 = (OraclePreparedStatement)conn.prepareStatement("select reg_no, name, cyear, skill from student natural join section natural join timeslot natural join plays where MON='F' and sid = ?");
-							//pst1.setString(1, "MON");
 							
-							//pst1.setString(2, half);
-							//pst1.setString(1, sid);
-							//pst.setString(4, regno);
-							
-							
-							OracleResultSet rs1 = (OracleResultSet)os.executeQuery("(select reg_no, name, cyear, skill from student natural join section natural join timeslot natural join plays where "+day+"="+half+" and sid="+sid+") minus (select reg_no, name, cyear, skill from student natural join section natural join timeslot natural join plays where reg_no = "+regno+")");
-							
-							boolean y = rs1.next();
-							System.out.println(y);
+							OracleResultSet rs1 = (OracleResultSet)os.executeQuery("(select distinct reg_no, name, cyear, skill, sex, primary_no, secondary from phone natural join student natural join section natural join timeslot natural join plays where "+day+"="+half+" and sid="+sid+") minus (select reg_no, name, cyear, skill, sex, primary_no, secondary from phone natural join student natural join section natural join timeslot natural join plays where reg_no = "+regno+")");
+
 							
 							
 							
 							while(rs1.next()) {
-								v.add("<html><i>Name: </i><b>"+rs1.getString(2)+"</b><br/><i>Reg. number: </i>"+rs1.getString(1)+"<i>		Year:</i>"+rs1.getString(3)+"			<i>Skill:</i>"+rs1.getString(4)+"</html>");
+								//OracleResultSet spr = (OracleResultSet)osp.executeQuery("select primary_no, secondary from phone where reg_no = "+rs1.getString(1));
+								v.add("<html><b>"+rs1.getString(2)+"</b><br/><i>Gender: </i>"+rs1.getString(5)+"<i>		Year:</i>"+rs1.getString(3)+"			<i>Skill:</i>"+rs1.getString(4)+"<br/><i>Primary no.: </i>"+rs1.getString(6)+"<i>Secondary no.: </i>"+rs1.getString(7)+"</html>");
 								//System.out.println(rs1.getString(1)+"\t\t\t"+rs1.getString(2)+"\t\t\t\t\t"+rs1.getString(3)+"\t"+rs1.getString(4));
 								reg.add(rs1.getString(1));
 							}
@@ -318,18 +369,60 @@ public class Schedule extends JFrame {
 						btnNextF.addActionListener(new ActionListener() {
 							public void actionPerformed(ActionEvent e) {
 								arr = list.getSelectedIndices();
+								try {
+									OracleStatement os = (OracleStatement) conn.createStatement();
+								rs = (OracleResultSet) os.executeQuery("select min_p from sport where sid = "+sid);
+								rs.next();
+								if(arr.length<rs.getInt(1));
+									JOptionPane.showMessageDialog(null, "The number of players selected is less than minimum requirement for the sport. However, you may continue.", "Warning", JOptionPane.WARNING_MESSAGE);
+								}
+								catch(SQLException ew) {
+									JOptionPane.showMessageDialog(null, ew.getMessage());
+								}
 								//for(int x: arr)
 								//System.out.println(x);
-								cl.next(contentPane);
+										cl.next(contentPane);
 								//arr has index values of all elements selected earlier
 								//reg.get(index) will fetch these values
-								
+								Vector<String> v1 = new Vector<>();
+								for(int i = 0; i< arr.length;i++)
+									v1.add(reg.get(arr[i]));
 								try {
-									CallableStatement cs = conn.prepareCall("{call getMatchID}");
+									
+									CallableStatement cs = conn.prepareCall("{call getMatchID(?)}");
+									cs.registerOutParameter(1, java.sql.Types.NUMERIC);
+									cs.executeUpdate();
+									mid = cs.getString(1);
+									lblHead.setText("Match ID : "+mid);
+									
+									
+									OracleStatement os = (OracleStatement)conn.createStatement();
+									os.executeQuery("insert into match values((select to_number(to_char(sysdate,'YYHHMMSS')) from dual),"+sid+","+aid+",sysdate,null)");
+									
+									for(int i = 0; i<v1.size();i++) {
+										os.execute("insert into assigned values("+v1.get(i)+","+mid+")");
+									}
+									String n = "<html><b>NAME</b><br/>";
+									String p = "<html><b>PHONE</b><br/>";
+									String a = "<html><b>ADDRESS</b><br/>";
+									for(int i = 0; i<v1.size();i++) {
+										rs =(OracleResultSet) os.executeQuery("select name, primary_no, address from student natural join phone where reg_no = "+v1.get(i));
+										rs.next();
+										n = n + rs.getString(1)+"<br/>";
+										p = p + rs.getString(2)+"<br/>";
+										a = a + rs.getString(3)+"<br/>";
+									}
+									pnlName.setText(n);
+									pnlPhone.setText(p);
+									pnlAddress.setText(a);
+										
+									
 								} catch (SQLException e1) {
 									// TODO Auto-generated catch block
 									JOptionPane.showMessageDialog(null, e1.getMessage());
 								}
+								
+								
 								
 								
 							}
