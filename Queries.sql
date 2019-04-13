@@ -68,3 +68,14 @@ select name, ct from list1 where ct=(select max(ct) from list1);
     
   12. --Adding to match 
    insert into match values((select to_number(to_char(sysdate,'YYHHMMSS')) from dual),sid,aid,sysdate,result);
+   
+   
+   create or replace trigger delLogin
+after delete on student 
+for each row 
+begin 
+delete from login where reg_no=:OLD.reg_no;
+end;
+/
+
+
