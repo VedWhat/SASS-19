@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import javax.swing.border.SoftBevelBorder;
 
@@ -138,11 +139,11 @@ public class Schedule extends JFrame {
 		JLabel lblItsAMatch = new JLabel("It's a Match!");
 		lblItsAMatch.setHorizontalAlignment(SwingConstants.CENTER);
 		lblItsAMatch.setFont(new Font("Courier 10 Pitch", Font.BOLD, 23));
-		lblItsAMatch.setBounds(12, 0, 476, 43);
+		lblItsAMatch.setBounds(12, 0, 476, 41);
 		resultPanel.add(lblItsAMatch);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(0, 53, 488, 319);
+		scrollPane.setBounds(0, 115, 488, 257);
 		resultPanel.add(scrollPane);
 		
 		
@@ -278,28 +279,29 @@ public class Schedule extends JFrame {
 		lblReady.setFont(new Font("Courier 10 Pitch", Font.BOLD, 19));
 		lblReady.setBounds(24, 233, 453, 41);
 		mainPanel.add(lblReady);
-		
+		Vector<String> v = new Vector<>();
 		try {
 			//regno has regno, sid will have sid, aid is static
 			String sid = ((Integer)(comboBoxSport.getSelectedIndex()+1)).toString();
 			//get DAY and TIME
-			CallableStatement cstmt = conn.prepareCall("{call getDay(?, ?)}");
-			cstmt.setString(1, "sysdate");
-			cstmt.registerOutParameter(2, java.sql.Types.VARCHAR);
+			JOptionPane.showMessageDialog(null, sid+regno);
+			CallableStatement cstmt = conn.prepareCall("{call getDay(?)}");
+			
+			cstmt.registerOutParameter(1, java.sql.Types.VARCHAR);
 			cstmt.executeUpdate();
-			String day = cstmt.getString(2);
+			String day = cstmt.getString(1);
 			
-			
-			pst = (OraclePreparedStatement)conn.prepareStatement("(select reg_no, name, sec_id, cyear" + 
-					"from student natural join section natural join timeslot natural join plays " + 
-					"where ?=? and sid = ?) minus (select reg_no, name, sec_id, cyear from student natural join section natural join timeslot where reg_no = ?)");
+			JOptionPane.showMessageDialog(null, day+sid+regno);
+			pst = (OraclePreparedStatement)conn.prepareStatement("(select reg_no, name, cyear, skill from student natural join section natural join timeslot natural join plays where ?=? and sid = ?) minus (select reg_no, name, cyear, skill from student natural join section natural join timeslot natural join plays where reg_no = ?)");
 			pst.setString(1, day);
-			pst.setString(2, "(select calMatchHalf from dual");
+			pst.setString(2, "'(select calMatchHalf from dual)'");
 			pst.setString(3, sid);
 			pst.setString(4, regno);
 			rs = (OracleResultSet)pst.executeQuery();
 			
 			while(rs.next()) {
+				v.add(rs.getString(1)+"\t\t\t"+rs.getString(2)+"\t\t\t\t\t"+rs.getString(3)+"\t"+rs.getString(4));
+				System.out.println(rs.getString(1)+"\t\t\t"+rs.getString(2)+"\t\t\t\t\t"+rs.getString(3)+"\t"+rs.getString(4));
 				
 			}
 			
@@ -307,8 +309,12 @@ public class Schedule extends JFrame {
 			JOptionPane.showMessageDialog(null, ex.getMessage());
 		}
 		
-		JList list = new JList();
+		JList<String> list = new JList<String>(v);
 		scrollPane.setViewportView(list);
+		
+		JLabel lblRequirements = new JLabel("New label");
+		lblRequirements.setBounds(12, 45, 476, 63);
+		resultPanel.add(lblRequirements);
 		//String sid has sportid and 
 		
 		
