@@ -23,6 +23,7 @@ import javax.swing.border.SoftBevelBorder;
 
 import oracle.jdbc.internal.OraclePreparedStatement;
 import oracle.jdbc.internal.OracleResultSet;
+import oracle.jdbc.internal.OracleStatement;
 import oracle.sql.NUMBER;
 
 import javax.swing.border.BevelBorder;
@@ -36,6 +37,7 @@ import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
+import javax.swing.JTable;
 
 @SuppressWarnings("unused")
 public class Schedule extends JFrame {
@@ -43,14 +45,18 @@ public class Schedule extends JFrame {
 	/**
 	 * 
 	 */
+	static boolean ready = false;
+	static int[] arr;
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	
+	static Vector<String> v = new Vector<>();
+	static Vector<String> reg = new Vector<>();
 	static String aid;
 	Connection conn=null;
     OraclePreparedStatement pst=null;
     OracleResultSet rs=null;
     private JTextField textField;
+    private JTable table;
 
 	/**
 	 * Launch the application.
@@ -133,8 +139,17 @@ public class Schedule extends JFrame {
 		JPanel resultPanel = new JPanel();
 		contentPane.add(resultPanel, "GameSet");
 		
+		JPanel finalPanel = new JPanel();
+		contentPane.add(finalPanel, "Match");
+		finalPanel.setLayout(null);
+		
+		table = new JTable();
+		table.setBounds(12, 77, 476, 350);
+		finalPanel.add(table);
+		
 		mainPanel.setLayout(null);
 		resultPanel.setLayout(null);
+		
 		
 		JLabel lblItsAMatch = new JLabel("It's a Match!");
 		lblItsAMatch.setHorizontalAlignment(SwingConstants.CENTER);
@@ -156,6 +171,7 @@ public class Schedule extends JFrame {
 		resultPanel.add(btnpanel);
 		
 		JButton btnNextF = new JButton("Next");
+		
 		btnNextF.setFont(new Font("Courier 10 Pitch", Font.BOLD, 18));
 		btnNextF.setBounds(393, 12, 95, 33);
 		btnpanel.add(btnNextF);
@@ -241,6 +257,7 @@ public class Schedule extends JFrame {
 				
 				String[] arrayArena = arena.toArray(new String[arena.size()]);
 				
+				@SuppressWarnings("rawtypes")
 				JComboBox comboBoxArena = new JComboBox(arrayArena);
 				aid =((Integer)(comboBoxArena.getSelectedIndex()+1)).toString();
 				comboBoxArena.setBounds(270, 328, 207, 29);
@@ -250,7 +267,73 @@ public class Schedule extends JFrame {
 				//btnNext must work only after the arena has been selected:
 				btnNext.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
+						JList<String> list;
+						try {
+							//regno has regno, sid will have sid, aid is static
+							String sid = ((Integer)(comboBoxSport.getSelectedIndex()+1)).toString();
+							//get DAY and TIME
+							conn = JavaConnectDB.ConnectDB();
+							
+							CallableStatement cstmt = conn.prepareCall("{call getDay(?)}");
+							cstmt.registerOutParameter(1, java.sql.Types.VARCHAR);
+							cstmt.executeUpdate();
+							String day = cstmt.getString(1);
+							
+							OracleStatement os = (OracleStatement)conn.createStatement();
+							OracleResultSet f = (OracleResultSet)os.executeQuery("select calMatchHalf from dual");
+							f.next();
+							String half = "'"+f.getString(1)+"'";
+							System.out.println(day);
+							System.out.println(half);
+							//OraclePreparedStatement pst1 = (OraclePreparedStatement)conn.prepareStatement("select reg_no, name, cyear, skill from student natural join section natural join timeslot natural join plays where MON='F' and sid = ?");
+							//pst1.setString(1, "MON");
+							
+							//pst1.setString(2, half);
+							//pst1.setString(1, sid);
+							//pst.setString(4, regno);
+							
+							
+							OracleResultSet rs1 = (OracleResultSet)os.executeQuery("(select reg_no, name, cyear, skill from student natural join section natural join timeslot natural join plays where "+day+"="+half+" and sid="+sid+") minus (select reg_no, name, cyear, skill from student natural join section natural join timeslot natural join plays where reg_no = "+regno+")");
+							
+							boolean y = rs1.next();
+							System.out.println(y);
+							
+							
+							
+							while(rs1.next()) {
+								v.add("<html><i>Name: </i><b>"+rs1.getString(2)+"</b><br/><i>Reg. number: </i>"+rs1.getString(1)+"<i>		Year:</i>"+rs1.getString(3)+"			<i>Skill:</i>"+rs1.getString(4)+"</html>");
+								//System.out.println(rs1.getString(1)+"\t\t\t"+rs1.getString(2)+"\t\t\t\t\t"+rs1.getString(3)+"\t"+rs1.getString(4));
+								reg.add(rs1.getString(1));
+							}
+							
+							
+							
+							
+						}catch(SQLException ex) {
+							JOptionPane.showMessageDialog(null, ex.getMessage());
+						}
+						list = new JList<String>(v);
+						scrollPane.setViewportView(list);
 						cl.next(contentPane);
+						btnNextF.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								arr = list.getSelectedIndices();
+								//for(int x: arr)
+								//System.out.println(x);
+								cl.next(contentPane);
+								//arr has index values of all elements selected earlier
+								//reg.get(index) will fetch these values
+								
+								try {
+									CallableStatement cs = conn.prepareCall("{call getMatchID}");
+								} catch (SQLException e1) {
+									// TODO Auto-generated catch block
+									JOptionPane.showMessageDialog(null, e1.getMessage());
+								}
+								
+								
+							}
+						});
 					}
 				});
 				
@@ -279,41 +362,14 @@ public class Schedule extends JFrame {
 		lblReady.setFont(new Font("Courier 10 Pitch", Font.BOLD, 19));
 		lblReady.setBounds(24, 233, 453, 41);
 		mainPanel.add(lblReady);
-		Vector<String> v = new Vector<>();
-		try {
-			//regno has regno, sid will have sid, aid is static
-			String sid = ((Integer)(comboBoxSport.getSelectedIndex()+1)).toString();
-			//get DAY and TIME
-			JOptionPane.showMessageDialog(null, sid+regno);
-			CallableStatement cstmt = conn.prepareCall("{call getDay(?)}");
-			
-			cstmt.registerOutParameter(1, java.sql.Types.VARCHAR);
-			cstmt.executeUpdate();
-			String day = cstmt.getString(1);
-			
-			JOptionPane.showMessageDialog(null, day+sid+regno);
-			pst = (OraclePreparedStatement)conn.prepareStatement("(select reg_no, name, cyear, skill from student natural join section natural join timeslot natural join plays where ?=? and sid = ?) minus (select reg_no, name, cyear, skill from student natural join section natural join timeslot natural join plays where reg_no = ?)");
-			pst.setString(1, day);
-			pst.setString(2, "'(select calMatchHalf from dual)'");
-			pst.setString(3, sid);
-			pst.setString(4, regno);
-			rs = (OracleResultSet)pst.executeQuery();
-			
-			while(rs.next()) {
-				v.add(rs.getString(1)+"\t\t\t"+rs.getString(2)+"\t\t\t\t\t"+rs.getString(3)+"\t"+rs.getString(4));
-				System.out.println(rs.getString(1)+"\t\t\t"+rs.getString(2)+"\t\t\t\t\t"+rs.getString(3)+"\t"+rs.getString(4));
-				
-			}
-			
-		}catch(SQLException ex) {
-			JOptionPane.showMessageDialog(null, ex.getMessage());
-		}
 		
-		JList<String> list = new JList<String>(v);
-		scrollPane.setViewportView(list);
 		
-		JLabel lblRequirements = new JLabel("New label");
-		lblRequirements.setBounds(12, 45, 476, 63);
+		
+		
+		
+		
+		JLabel lblRequirements = new JLabel("<html>Select who you want to play with! <br/> Click 'next' when done.");
+		lblRequirements.setBounds(12, 45, 476, 58);
 		resultPanel.add(lblRequirements);
 		//String sid has sportid and 
 		

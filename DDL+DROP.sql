@@ -46,7 +46,6 @@ create table Student  (
 create table phone(
 	reg_no number(10) primary key,
 	Primary_no number(10) not null,
-	Whatsapp number(10) not null,
 	Secondary number(10),
 	foreign key (reg_no) references Student on delete cascade 
 );

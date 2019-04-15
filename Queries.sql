@@ -55,3 +55,11 @@ select name, ct from list1 where ct=(select max(ct) from list1);
 10. --select all studets of section CSE-B that play 'Tennis'
 
     select p.name, reg_no from student p natural join plays where sid=2 and sec_id='CSE-B'; 
+
+
+
+ 
+        
+    (select reg_no, name, cyear, skill
+    from student natural join section natural join timeslot natural join plays
+    where MON='F' and sid = 2) minus (select reg_no, name, cyear, skill from student natural join section natural join timeslot natural join plays where reg_no = 1)
